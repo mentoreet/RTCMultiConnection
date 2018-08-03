@@ -231,31 +231,31 @@ function serverHandler(request, response) {
     }
 }
 
-var app = express();
+var app;
 
+if (isUseHTTPs) {
+    app = server.createServer(options, serverHandler);
+} else {
+    app = server.createServer(serverHandler);
+}
 
-// if (isUseHTTPs) {
-//     app = server.createServer(options, serverHandler);
-// } else {
-//     app = server.createServer(serverHandler);
-// }
+// var app = express();
+// var allowedOrigins = ['http://localhost:5060', 'stg.moducoding.com', 'moducoding.com']
+// app.use(cors({
+//    origin: function(origin, callback){
+//      if (!origin) {
+//        return callback(null, true);
+//      }
 
-var allowedOrigins = ['http://localhost:5060', 'stg.moducoding.com', 'moducoding.com']
-app.use(cors({
-   origin: function(origin, callback){
-     if (!origin) {
-       return callback(null, true);
-     }
+//      if (allowedOrigins.indexOf(origin) === -1) {
+//        var mag = 'The CORS policy for this site does not allow access from the specified Origin.';
 
-     if (allowedOrigins.indexOf(origin) === -1) {
-       var mag = 'The CORS policy for this site does not allow access from the specified Origin.';
+//        return callback(new Error(msg), false);
+//      }
 
-       return callback(new Error(msg), false);
-     }
-
-     return callback(null, true);
-   }
-}));
+//      return callback(null, true);
+//    }
+// }));
 
 
 function cmd_exec(cmd, args, cb_stdout, cb_end) {
