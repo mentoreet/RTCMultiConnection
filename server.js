@@ -26,6 +26,8 @@ try {
 
 var fs = require('fs');
 var path = require('path');
+var express = require('express'),
+    cors = require('cors');
 
 var ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem')));
 var ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')));
@@ -83,15 +85,12 @@ var options = {
 
 var server = require(isUseHTTPs ? 'https' : 'http');
 var url = require('url');
-var allowedOrigins = ['localhost:5060', 'stg.moducoding.com', 'moducoding.com']
+
 function serverHandler(request, response) {
     try {
         var uri = url.parse(request.url).pathname,
-            filename = path.join(process.cwd(), uri);
+            filename = path.join(process.cwd(), uri);     
         
-        console.log('referer ===> ' + request.headers.referer);
-        console.log('origin ===> ' + request.headers.origin);
-
         if (request.method !== 'GET' || path.join('/', uri).indexOf('../') !== -1) {
             response.writeHead(401, {
                 'Content-Type': 'text/plain'
@@ -232,13 +231,32 @@ function serverHandler(request, response) {
     }
 }
 
-var app;
+var app = express();
 
-if (isUseHTTPs) {
-    app = server.createServer(options, serverHandler);
-} else {
-    app = server.createServer(serverHandler);
-}
+
+// if (isUseHTTPs) {
+//     app = server.createServer(options, serverHandler);
+// } else {
+//     app = server.createServer(serverHandler);
+// }
+
+var allowedOrigins = ['http://localhost:5060', 'stg.moducoding.com', 'moducoding.com']
+app.use(cors({
+   origin: function(origin, callback){
+     if (!origin) {
+       return callback(null, true);
+     }
+
+     if (allowedOrigins.indexOf(origin) === -1) {
+       var mag = 'The CORS policy for this site does not allow access from the specified Origin.';
+
+       return callback(new Error(msg), false);
+     }
+
+     return callback(null, true);
+   }
+}));
+
 
 function cmd_exec(cmd, args, cb_stdout, cb_end) {
     var spawn = require('child_process').spawn,
