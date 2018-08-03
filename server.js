@@ -83,11 +83,14 @@ var options = {
 
 var server = require(isUseHTTPs ? 'https' : 'http');
 var url = require('url');
-
+var allowedOrigins = ['localhost:5060', 'stg.moducoding.com', 'moducoding.com']
 function serverHandler(request, response) {
     try {
         var uri = url.parse(request.url).pathname,
             filename = path.join(process.cwd(), uri);
+        
+        console.log('referer ===> ' + request.headers.referer);
+        console.log('origin ===> ' + request.headers.origin);
 
         if (request.method !== 'GET' || path.join('/', uri).indexOf('../') !== -1) {
             response.writeHead(401, {
